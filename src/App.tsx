@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Download, User, Briefcase, GraduationCap, /* Languages, */ Award, Eye } from 'lucide-react';
 // Importer les types depuis @/types (qui exporte maintenant tous les types)
@@ -10,16 +10,25 @@ import {
   PersonalData, 
   SkillsData 
 } from '@/types';
-import PreviewCV from '@/components/PreviewCV';
-import PersonalForm, { PersonalFormRef } from '@/components/PersonalForm';
-import ExperienceForm, { ExperienceFormRef } from '@/components/ExperienceForm';
-import EducationForm, { EducationFormRef } from '@/components/EducationForm';
-// SkillsForm props devront être ajustées
-import SkillsForm, { SkillsFormRef } from '@/components/SkillsForm';
+import { useNavigate } from 'react-router-dom';
+
+// Importer seulement les références aux types et les composants légers
+import { PersonalFormRef } from '@/components/PersonalForm';
+import { ExperienceFormRef } from '@/components/ExperienceForm';
+import { EducationFormRef } from '@/components/EducationForm';
+import { SkillsFormRef } from '@/components/SkillsForm';
 import LanguageSelector from '@/components/LanguageSelector';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
 import html2pdf from 'html2pdf.js';
+
+// Lazy load des composants lourds
+const PersonalForm = lazy(() => import('@/components/PersonalForm'));
+const ExperienceForm = lazy(() => import('@/components/ExperienceForm'));
+const EducationForm = lazy(() => import('@/components/EducationForm'));
+const SkillsForm = lazy(() => import('@/components/SkillsForm'));
+const PreviewCV = lazy(() => import('@/components/PreviewCV'));
 
 // Sections (label sera traduit)
 const sections: { id: Section; icon: React.ElementType }[] = [
@@ -32,8 +41,8 @@ const sections: { id: Section; icon: React.ElementType }[] = [
 
 const LOCAL_STORAGE_KEY = 'cv-creator-data-v2'; // Changer la clé si la structure change
 
-// Valeur initiale explicitement typée avec CVData
-const initialCVData = {
+// Valeur initiale pour CVData
+const initialCVData: CVData = {
   personal: { 
     nom: '', 
     prenom: '', 
@@ -45,44 +54,92 @@ const initialCVData = {
     portfolio: '', 
     titre: '', 
     description: '' 
-  } as any, // Contourner temporairement l'erreur de type
+  } as PersonalData,
   experience: [],
   education: [],
   skills: { 
     competences: [], 
     langues: []
   },
-} as CVData; // Assertion de type pour l'objet entier
+};
+
+// Composant de navigation mémorisé
+const SidebarSection = React.memo(({ 
+  section, 
+  isActive, 
+  onClick 
+}: { 
+  section: { id: Section; icon: React.ElementType }; 
+  isActive: boolean; 
+  onClick: () => void 
+}) => {
+  const { t } = useTranslation();
+  const Icon = section.icon;
+
+  return (
+    <Button
+      variant={isActive ? "secondary" : "ghost"}
+      className="w-full justify-start h-10 md:h-11"
+      onClick={onClick}
+    >
+      <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
+      {t(`sidebar.${section.id}`)}
+      {section.id !== 'preview' && (
+         <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+      )}
+    </Button>
+  );
+});
+
+SidebarSection.displayName = 'SidebarSection';
+
+// Composant pour les boutons de raccourcis
+const ShortcutButton = React.memo(({ 
+  icon: Icon, 
+  path, 
+  label 
+}: { 
+  icon: React.ElementType; 
+  path: string; 
+  label: string 
+}) => {
+  const navigate = useNavigate();
+  
+  return (
+    <Button
+      variant="outline"
+      className="w-full justify-start h-10 md:h-11"
+      onClick={() => navigate(path)}
+    >
+      <Icon className="mr-2 h-4 w-4" />
+      {label}
+    </Button>
+  );
+});
+
+ShortcutButton.displayName = 'ShortcutButton';
 
 function App() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState<Section>('personal');
   
-  // Utiliser directement initialCVData pour l'état initial par défaut
   const [cvData, setCVData] = useState<CVData>(() => {
     try {
       const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedData) {
         const parsedData = JSON.parse(savedData);
-        // TODO: Valider avec Zod (cvSchema.parse(parsedData))
-        // Pour l'instant, on assume que c'est correct
-        // Vérifier si les clés attendues sont présentes, sinon retourner initialCVData
         if (parsedData && parsedData.personal && parsedData.skills) {
            return parsedData as CVData;
-        } else {
-           console.warn("Données localStorage invalides, retour à l'état initial.");
-           localStorage.removeItem(LOCAL_STORAGE_KEY);
-           return initialCVData;
         }
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
       }
     } catch (error) {
-      console.error("Erreur lecture localStorage:", error);
       localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
-    return initialCVData; // Retourner l'objet initial bien typé
+    return initialCVData;
   });
 
-  // Refs (inchangé)
   const personalFormRef = useRef<PersonalFormRef>(null);
   const experienceFormRef = useRef<ExperienceFormRef>(null);
   const educationFormRef = useRef<EducationFormRef>(null);
@@ -96,101 +153,102 @@ function App() {
     preview: null
   };
 
-  // Sauvegarde localStorage (inchangé)
+  // Sauvegarde localStorage optimisée
   useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cvData));
-    } catch (error) {
-      console.error("Erreur sauvegarde localStorage:", error);
+    const saveToStorage = () => {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cvData));
+      } catch (error) {
+        console.error("Erreur sauvegarde localStorage:", error);
+      }
+    };
+    
+    let idleCallbackId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    
+    if (typeof window.requestIdleCallback === 'function') {
+      idleCallbackId = window.requestIdleCallback(saveToStorage);
+    } else {
+      timeoutId = setTimeout(saveToStorage, 500);
     }
+    
+    return () => {
+      if (idleCallbackId !== undefined && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleCallbackId);
+      }
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [cvData]);
 
-  // --- Fonctions de mise à jour avec les clés personal, experience, skills --- 
   const updatePersonal = (data: PersonalData) => {
-    setCVData(prevData => ({
-      ...prevData,
-      personal: data, // Utiliser `personal`
-    }));
+    setCVData(prevData => ({ ...prevData, personal: data }));
     toast.success(t('saveSuccess.personal', { ns: 'common', defaultValue: "Informations personnelles enregistrées" }));
   };
 
   const saveExperiences = (data: ExperienceEntry[]) => {
-    setCVData(prevData => ({
-      ...prevData,
-      experience: data, // Utiliser `experience`
-    }));
+    setCVData(prevData => ({ ...prevData, experience: data }));
     toast.success(t('saveSuccess.experience', { ns: 'common', defaultValue: "Expériences enregistrées" }));
   };
 
   const saveEducations = (data: EducationEntry[]) => {
-    setCVData(prevData => ({
-      ...prevData,
-      education: data,
-    }));
+    setCVData(prevData => ({ ...prevData, education: data }));
     toast.success(t('saveSuccess.education', { ns: 'common', defaultValue: "Formations enregistrées" }));
   };
 
-  // saveSkills reçoit et sauvegarde directement SkillsData
   const saveSkills = (data: SkillsData) => {
-    setCVData(prevData => ({
-      ...prevData,
-      skills: data, // Utiliser `skills`
-    }));
+    setCVData(prevData => ({ ...prevData, skills: data }));
     toast.success(t('saveSuccess.skills', { ns: 'common', defaultValue: "Compétences & Langues enregistrées" }));
   };
 
-  // Navigation (inchangé)
   const handleNavigate = async (targetSection: Section) => {
     if (targetSection === currentSection) return;
+    
     const currentFormRef = formRefs[currentSection];
     if (currentFormRef?.current?.triggerSubmit) {
-      console.log(`Tentative de sauvegarde section: ${currentSection}`);
       const success = await currentFormRef.current.triggerSubmit();
       if (!success) {
-          toast.error(t('errors.unsavedChanges', { ns: 'common', defaultValue: "Veuillez corriger les erreurs avant de continuer." }));
-          return;
+        toast.error(t('errors.unsavedChanges', { ns: 'common', defaultValue: "Veuillez corriger les erreurs avant de continuer." }));
+        return;
       }
-       console.log(`Sauvegarde section ${currentSection} réussie.`);
     }
     setCurrentSection(targetSection);
   };
 
-  // Rendu des sections avec les props initialData correspondantes
-  const renderSection = () => {
-    switch (currentSection) {
-      case 'personal':
-        return <PersonalForm ref={personalFormRef} initialData={cvData.personal} onSave={updatePersonal} />;
+  const renderSection = useMemo(() => (
+    <Suspense fallback={<LoadingSpinner size="large" />}>
+      {(() => {
+        switch (currentSection) {
+          case 'personal':
+            return <PersonalForm ref={personalFormRef} initialData={cvData.personal} onSave={updatePersonal} />;
+          case 'experience':
+            return <ExperienceForm ref={experienceFormRef} initialData={cvData.experience || []} onSave={saveExperiences} />;
+          case 'education':
+            return <EducationForm ref={educationFormRef} initialData={cvData.education || []} onSave={saveEducations} />;
+          case 'skills':
+            return <SkillsForm ref={skillsFormRef} initialData={cvData.skills} onSave={saveSkills} />;
+          case 'preview':
+            return <PreviewCV cvData={cvData} />;
+          default:
+            return null;
+        }
+      })()}
+    </Suspense>
+  ), [currentSection, cvData, updatePersonal, saveExperiences, saveEducations, saveSkills]);
 
-      case 'experience':
-        return <ExperienceForm ref={experienceFormRef} initialData={cvData.experience || []} onSave={saveExperiences} />;
-
-      case 'education':
-        return <EducationForm ref={educationFormRef} initialData={cvData.education || []} onSave={saveEducations} />;
-
-      case 'skills':
-        // Passer cvData.skills directement
-        return <SkillsForm ref={skillsFormRef} initialData={cvData.skills} onSave={saveSkills} />;
-
-      case 'preview':
-        // Passer cvData complet
-        return <PreviewCV cvData={cvData} />;
-
-      default:
-        return null;
-    }
-  };
-
-  // Téléchargement PDF (utiliser cvData.personal)
   const handleDownloadPDF = () => {
     if (currentSection !== 'preview') {
       toast.warning(t('errors.navigateToPreview', { ns: 'common', defaultValue: "Veuillez aller dans l'Aperçu pour télécharger." }));
       return;
     }
+    
     const element = document.getElementById('cv-preview-area');
     if (!element) {
       toast.error(t('errors.previewAreaNotFound', { ns: 'common', defaultValue: "Erreur: Zone d'aperçu introuvable." }));
       return;
     }
+    
     const opt = {
       margin: 0.5,
       filename: `CV_${cvData.personal.prenom || 'Prenom'}_${cvData.personal.nom || 'Nom'}.pdf`,
@@ -198,6 +256,7 @@ function App() {
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
+    
     const promise = html2pdf().from(element).set(opt).save();
     toast.promise(promise, {
       loading: t('pdf.generating', { ns: 'common', defaultValue: 'Génération PDF...' }),
@@ -206,10 +265,37 @@ function App() {
     });
   };
 
-  // Gestion dir RTL (inchangé)
   useEffect(() => {
     document.documentElement.dir = i18n.dir();
   }, [i18n, i18n.language]);
+
+  const sidebarNavigation = useMemo(() => (
+    <nav className="space-y-1 flex-grow">
+      {sections.map((section) => (
+        <SidebarSection
+          key={section.id}
+          section={section}
+          isActive={currentSection === section.id}
+          onClick={() => handleNavigate(section.id)}
+        />
+      ))}
+    </nav>
+  ), [currentSection]);
+
+  const shortcuts = useMemo(() => (
+    <div className="space-y-2">
+      <ShortcutButton 
+        icon={Briefcase} 
+        path="/offres-emploi" 
+        label={t('sidebar.jobOffers', 'Offres d\'emploi')}
+      />
+      <ShortcutButton 
+        icon={GraduationCap} 
+        path="/formation" 
+        label={t('sidebar.training', 'Se former')}
+      />
+    </div>
+  ), [t]);
 
   return (
     <>
@@ -218,23 +304,7 @@ function App() {
           <h1 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-indigo-600 flex items-center gap-2 px-2">
             {t('header.title')} {/* Clé ajustée */}
           </h1>
-          <nav className="space-y-1 flex-grow">
-            {sections.map((section) => (
-              <Button
-                key={section.id}
-                variant={currentSection === section.id ? "secondary" : "ghost"}
-                className="w-full justify-start h-10 md:h-11"
-                onClick={() => handleNavigate(section.id)}
-              >
-                <section.icon className="mr-2 h-4 w-4 flex-shrink-0" />
-                {/* Traduire le label de section */} 
-                {t(`sidebar.${section.id}`)}
-                {section.id !== 'preview' && (
-                   <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            ))}
-          </nav>
+          {sidebarNavigation}
           <Button
             onClick={handleDownloadPDF}
             className="mt-6 w-full h-10 md:h-11"
@@ -242,13 +312,21 @@ function App() {
             <Download className="mr-2 h-4 w-4" />
             {t('ui.download')} {/* Clé ajustée */}
           </Button>
+          
+          {/* Raccourcis vers les autres pages */}
+          <div className="mt-8 border-t border-gray-200 pt-4">
+            <h2 className="text-sm font-semibold text-gray-500 mb-3 px-2">
+              {t('sidebar.shortcuts', 'Raccourcis')}
+            </h2>
+            {shortcuts}
+          </div>
         </aside>
 
         <main className="flex-1 p-4 md:p-10 overflow-y-auto relative">
           <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
             <LanguageSelector />
           </div>
-          {renderSection()}
+          {renderSection}
         </main>
       </div>
       <Toaster richColors position="bottom-right" />
@@ -256,4 +334,5 @@ function App() {
   );
 }
 
-export default App;
+// Éviter les re-renders inutiles
+export default React.memo(App);

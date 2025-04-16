@@ -7,6 +7,16 @@
     "dark": "Sombre",
     "system": "Système"
   },
+  "sidebar": {
+    "personal": "Infos Personnelles",
+    "experience": "Expériences",
+    "education": "Formations",
+    "skills": "Compétences",
+    "preview": "Aperçu",
+    "shortcuts": "Raccourcis",
+    "jobOffers": "Offres d'emploi",
+    "training": "Se former"
+  },
   "personalInfo": {
     "title": "Informations Personnelles",
     "firstName": "Prénom",

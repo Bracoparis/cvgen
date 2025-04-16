@@ -7,6 +7,16 @@
     "dark": "داكن",
     "system": "النظام"
   },
+  "sidebar": {
+    "personal": "المعلومات الشخصية",
+    "experience": "الخبرة العملية",
+    "education": "التعليم",
+    "skills": "المهارات",
+    "preview": "المعاينة",
+    "shortcuts": "اختصارات",
+    "jobOffers": "عروض العمل",
+    "training": "التدريب"
+  },
   "personalInfo": {
     "title": "المعلومات الشخصية",
     "firstName": "الاسم الأول",

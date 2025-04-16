@@ -7,6 +7,16 @@
     "dark": "Dark",
     "system": "System"
   },
+  "sidebar": {
+    "personal": "Personal Info",
+    "experience": "Experience",
+    "education": "Education",
+    "skills": "Skills",
+    "preview": "Preview",
+    "shortcuts": "Shortcuts",
+    "jobOffers": "Job Offers",
+    "training": "Training"
+  },
   "personalInfo": {
     "title": "Personal Information",
     "fullName": "Full Name",
