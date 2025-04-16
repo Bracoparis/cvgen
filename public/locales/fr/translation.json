@@ -1,0 +1,195 @@
+{
+  "header": {
+    "title": "Créateur de CV"
+  },
+  "appTitle": "Créateur de CV",
+  "downloadButton": "Télécharger le CV",
+  "sidebar": {
+    "personal": "Infos Personnelles",
+    "experience": "Expériences",
+    "education": "Formations",
+    "skills": "Compétences",
+    "preview": "Aperçu"
+  },
+  "personalInfo": {
+    "title": "Informations Personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email",
+    "phoneNumber": "Téléphone",
+    "address": "Adresse",
+    "description": "Description (Petite bio)",
+    "descriptionHelper": "Une courte présentation qui apparaîtra en haut de votre CV.",
+    "descriptionPlaceholder": "Décrivez-vous brièvement...",
+    "jobTitle": "Titre du poste",
+    "jobTitlePlaceholder": "Ex: Développeur Web",
+    "linkedin": "LinkedIn",
+    "github": "GitHub",
+    "portfolio": "Portfolio",
+    "validation": {
+      "firstNameRequired": "Le prénom est requis",
+      "lastNameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "L'adresse email n'est pas valide",
+      "linkedinInvalid": "L'URL LinkedIn n'est pas valide",
+      "githubInvalid": "L'URL GitHub n'est pas valide",
+      "portfolioInvalid": "L'URL du portfolio n'est pas valide",
+      "descriptionMaxLength": "La description ne peut pas dépasser 300 caractères"
+    }
+  },
+  "personalForm": {
+    "title": "Informations Personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "description": "Description (Petite bio)",
+    "descriptionHelper": "Une courte présentation qui apparaîtra en haut de votre CV."
+  },
+  "experience": {
+    "title": "Expérience Professionnelle",
+    "description": "Ajoutez vos expériences professionnelles",
+    "add": "Ajouter une expérience",
+    "position": "Poste",
+    "company": "Entreprise",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "tasks": "Tâches et responsabilités",
+    "tasksPlaceholder": "Décrivez vos tâches et responsabilités...",
+    "startDatePlaceholder": "Ex: Janvier 2020",
+    "endDatePlaceholder": "Ex: Décembre 2021 ou Présent",
+    "experienceCardTitle": "Expérience #{{index}}",
+    "noExperience": "Aucune expérience ajoutée, cliquez sur le bouton ci-dessus pour en ajouter.",
+    "removeExperienceAria": "Supprimer cette expérience",
+    "validation": {
+      "positionRequired": "Le poste est requis",
+      "companyRequired": "L'entreprise est requise",
+      "startDateRequired": "La date de début est requise",
+      "tasksMaxLength": "La description ne peut pas dépasser 500 caractères"
+    }
+  },
+  "experienceForm": {
+    "title": "Expérience Professionnelle",
+    "addExperience": "Ajouter une expérience",
+    "position": "Poste",
+    "company": "Entreprise",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "description": "Description",
+    "delete": "Supprimer",
+    "save": "Enregistrer"
+  },
+  "education": {
+    "title": "Formation",
+    "description": "Ajoutez vos diplômes et formations",
+    "add": "Ajouter une formation",
+    "institution": "Établissement",
+    "degree": "Diplôme",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "description": "Description",
+    "educationCardTitle": "Formation #{{index}}",
+    "noEducation": "Aucune formation ajoutée, cliquez sur le bouton ci-dessus pour en ajouter.",
+    "removeEducationAria": "Supprimer cette formation",
+    "validation": {
+      "institutionRequired": "L'établissement est requis",
+      "degreeRequired": "Le diplôme est requis",
+      "startDateRequired": "La date de début est requise",
+      "descriptionMaxLength": "La description ne peut pas dépasser 300 caractères"
+    }
+  },
+  "educationForm": {
+    "title": "Formation",
+    "addEducation": "Ajouter une formation",
+    "institution": "Établissement",
+    "degree": "Diplôme",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "description": "Description",
+    "delete": "Supprimer",
+    "save": "Enregistrer"
+  },
+  "skills": {
+    "title": "Compétences et Langues",
+    "description": "Ajoutez vos compétences techniques et langues",
+    "technicalSkills": "Compétences Techniques",
+    "languages": "Langues",
+    "add": "Ajouter",
+    "addSkillPlaceholder": "Saisir une compétence et appuyer sur Entrée",
+    "addLanguagePlaceholder": "Saisir une langue et appuyer sur Entrée",
+    "addPlaceholder": "Ajouter",
+    "noSkills": "Aucune compétence ajoutée",
+    "noLanguages": "Aucune langue ajoutée",
+    "removeSkillAria": "Supprimer {{skill}}",
+    "removeLanguageAria": "Supprimer {{language}}",
+    "validation": {
+      "skillRequired": "Le nom de la compétence est requis",
+      "levelInvalid": "Le niveau n'est pas valide"
+    },
+    "toast": {
+      "skillAdded": "Compétence {{skill}} ajoutée",
+      "skillExists": "Compétence {{skill}} existe déjà",
+      "skillEmpty": "Veuillez saisir une compétence",
+      "skillRemoved": "Compétence {{skill}} supprimée",
+      "languageAdded": "Langue {{language}} ajoutée",
+      "languageExists": "Langue {{language}} existe déjà",
+      "languageEmpty": "Veuillez saisir une langue",
+      "languageRemoved": "Langue {{language}} supprimée"
+    }
+  },
+  "skillsForm": {
+    "title": "Compétences",
+    "addSkill": "Ajouter une compétence",
+    "name": "Nom de la compétence",
+    "level": "Niveau",
+    "selectLevel": "Sélectionner le niveau",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "expert": "Expert",
+    "delete": "Supprimer",
+    "save": "Enregistrer"
+  },
+  "preview": {
+    "title": "Aperçu du CV",
+    "personalInfo": "Informations Personnelles",
+    "experiences": "Expériences Professionnelles",
+    "education": "Formation",
+    "skills": "Compétences",
+    "noPersonalInfo": "Aucune information personnelle fournie.",
+    "noExperience": "Aucune expérience professionnelle ajoutée.",
+    "noEducation": "Aucune formation ajoutée.",
+    "noSkills": "Aucune compétence ajoutée.",
+    "present": "Présent",
+    "contact": "Contact"
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "invalidEmail": "Adresse email invalide",
+    "invalidUrl": "URL invalide",
+    "maxLength": "La description ne peut pas dépasser {{count}} caractères",
+    "unsavedChanges": "Veuillez corriger les erreurs avant de continuer.",
+    "navigateToPreview": "Veuillez aller dans l'Aperçu pour télécharger.",
+    "previewAreaNotFound": "Erreur: Zone d'aperçu introuvable."
+  },
+  "ui": {
+    "previous": "Précédent",
+    "next": "Suivant",
+    "submit": "Générer le CV",
+    "download": "Télécharger en PDF"
+  },
+  "common": {
+    "saveSuccess": {
+      "personal": "Informations personnelles enregistrées",
+      "experience": "Expériences enregistrées",
+      "education": "Formations enregistrées",
+      "skills": "Compétences & Langues enregistrées"
+    }
+  },
+  "pdf": {
+    "generating": "Génération PDF...",
+    "success": "PDF téléchargé !",
+    "error": "Erreur génération PDF."
+  }
+} 
