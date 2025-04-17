@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/components/ui/button';
 import { 
   Card, 
   CardContent, 
@@ -17,16 +17,21 @@ import {
   CardTitle, 
   CardDescription,
   CardFooter 
-} from '@/shared/ui/card';
-import { Input } from '@/shared/ui/input';
-import { Label } from '@/shared/ui/label';
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Search, ArrowLeft, Building, MapPin, Briefcase, Calendar, Euro } from 'lucide-react';
-import { LoadingSpinner } from '@/core/components/LoadingSpinner';
-import { JobOffer, searchJobs, getJobDetails } from '@/features/job-search/services/job-scraper.service';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/shared/ui/dialog';
-import { ScrollArea } from '@/shared/ui/scroll-area';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { JobOffer, searchJobs, getJobDetails } from '@/services/jobScraper';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { JobScraperInterface } from '@/features/job-search/components/JobScraperInterface';
 import { getTotalJobsCount, getTopRecruiters } from '@/features/job-search/data/database-stats';
+
+interface Recruiter {
+  name: string;
+  count: number;
+}
 
 /**
  * Interface pour les données du formulaire de recherche
@@ -154,6 +159,20 @@ const JobOffersPage: React.FC = () => {
   const totalJobsCount = getTotalJobsCount();
   const topRecruiters = getTopRecruiters(5);
 
+  // Fonction de rendu des recruteurs avec types explicites
+  const renderRecruiters = (recruiters: Recruiter[], index: number) => {
+    return (
+      <div key={index} className="flex flex-col gap-2">
+        {recruiters.map((recruiter: Recruiter) => (
+          <div key={recruiter.name} className="flex justify-between items-center">
+            <span>{recruiter.name}</span>
+            <span className="text-gray-500">{recruiter.count} offres</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -192,7 +211,7 @@ const JobOffersPage: React.FC = () => {
                     <Input 
                       id="city" 
                       name="city" 
-                      placeholder="Paris, Lyon, Marseille..." 
+                      placeholder="Ex: Paris, Lyon, Marseille..." 
                       className="pl-10"
                       value={formData.city}
                       onChange={handleFormChange}
@@ -208,7 +227,7 @@ const JobOffersPage: React.FC = () => {
                     <Input 
                       id="jobTitle" 
                       name="jobTitle" 
-                      placeholder="Développeur, Assistant, Chef de projet..." 
+                      placeholder="Ex: Développeur, Assistant, Chef de projet..." 
                       className="pl-10"
                       value={formData.jobTitle}
                       onChange={handleFormChange}
@@ -244,17 +263,7 @@ const JobOffersPage: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-medium mb-2">Top 5 des recruteurs en intérim</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {topRecruiters.map((recruiter, index) => (
-                        <div key={index} className="flex items-center p-3 bg-blue-50 rounded-lg">
-                          <div className="w-8 h-8 flex items-center justify-center bg-blue-100 rounded-full mr-3 text-blue-700 font-bold">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{recruiter.name}</p>
-                            <p className="text-sm text-gray-600">{recruiter.count} offres</p>
-                          </div>
-                        </div>
-                      ))}
+                      {renderRecruiters(topRecruiters, 0)}
                     </div>
                   </div>
                   

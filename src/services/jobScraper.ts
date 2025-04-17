@@ -72,199 +72,140 @@ export async function closeHelloWorkPopups(): Promise<void> {
 }
 
 /**
- * Récupère les offres d'intérim depuis HelloWork pour une ville donnée
+ * Scrape les offres d'emploi depuis HelloWork
+ * @param city Ville recherchée
+ * @param jobTitle Titre du poste recherché
+ * @returns Liste des offres d'emploi
  */
-export async function scrapeHelloWorkJobs(city: string = 'paris', jobTitle: string = ''): Promise<JobOffer[]> {
-  try {
-    // Construction de l'URL
-    const formattedCity = city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const baseUrl = 'https://www.hellowork.com/fr-fr/interim';
-    
-    // Si une ville est spécifiée, on l'ajoute à l'URL
-    const url = formattedCity 
-      ? `${baseUrl}/ville_${formattedCity}-75000.html` 
-      : baseUrl;
-    
-    console.log(`Scraping jobs from: ${url}`);
-    
-    // Initialiser Puppeteer et naviguer vers l'URL pour gérer les popups automatiquement
+export async function scrapeHelloWorkJobs(city: string = '', jobTitle: string = ''): Promise<JobOffer[]> {
+  const offers: JobOffer[] = [];
+  const baseUrl = 'https://www.hellowork.com/fr-fr/emploi/recherche.html';
+  
+  // Parcourir les 50 premières pages (20 offres par page = 1000 offres)
+  for (let page = 1; page <= 50; page++) {
     try {
-      await browserAutomation.initialize();
-      await browserAutomation.navigateTo(url);
-      await browserAutomation.closePopups();
-      // On pourrait récupérer le HTML directement de puppeteer ici, mais on continue avec Axios pour la compatibilité
-    } catch (puppeteerError) {
-      console.warn('Erreur lors de l\'automatisation du navigateur, continuation avec méthode standard:', puppeteerError);
-    }
-    
-    // Récupérer toutes les offres en parcourant plusieurs pages
-    const offers: JobOffer[] = [];
-    let currentPage = 1;
-    const maxPages = 20; // Limiter à 20 pages pour éviter les boucles infinies
-    let hasMorePages = true;
-    
-    while (hasMorePages && currentPage <= maxPages) {
-      const pageUrl = currentPage === 1 ? url : `${url}?page=${currentPage}`;
-      console.log(`Scraping page ${currentPage}: ${pageUrl}`);
-      
-      // Émettre un événement de progression pour l'interface utilisateur
-      try {
-        const progressEvent = new CustomEvent('scraping-progress', {
-          detail: { 
-            type: 'scraping-progress',
-            message: `Analyse de la page ${currentPage} des offres d'intérim...`
-          }
-        });
-        window.dispatchEvent(progressEvent);
-      } catch (eventError) {
-        console.warn('Erreur lors de l\'émission de l\'événement de progression:', eventError);
-      }
-      
-      try {
-        // Récupérer le HTML de la page
-        const response = await axios.get(pageUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
-            'Referer': 'https://www.hellowork.com/',
-            'sec-ch-ua': '"Chromium";v="122", "Google Chrome";v="122", "Not(A:Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"macOS"',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-          },
-          timeout: 10000, // 10 secondes de timeout
-          maxRedirects: 5
-        });
-        
-        const html = response.data;
-        const $ = cheerio.load(html);
-        
-        let pageOffersCount = 0;
-        
-        // Sélecteur pour chaque offre d'emploi - utilisation d'un sélecteur plus robuste
-        $('article[data-testid="job-card"]').each((i, element) => {
-          // Extraction des données de l'offre
-          const title = $(element).find('h3[data-testid="job-title"]').text().trim() || 
-                        $(element).find('h3.tw-text-lg').text().trim();
-          
-          const company = $(element).find('[data-testid="company-name"]').text().trim() || 
-                          $(element).find('a.tw-text-hw-primaryDarker').first().text().trim();
-          
-          const location = $(element).find('[data-testid="job-location"]').text().trim() || 
-                           $(element).find('span.tw-text-hw-neutral-700:contains("-")').text().trim();
-          
-          const description = $(element).find('[data-testid="job-description"]').text().trim() || 
-                              $(element).find('div.tw-text-hw-neutral-800').text().trim();
-          
-          // Extraction du salaire
-          const salary = $(element).find('span:contains("€")').text().trim();
-          
-          // Extraction de la durée de mission
-          let duration = '';
-          $(element).find('span.tw-ml-auto, [data-testid="job-contract-type"]').each((_, el) => {
-            const text = $(el).text().trim();
-            if (text.includes('jour') || text.includes('mois')) {
-              duration = text;
-            }
-          });
-          
-          // Date de publication
-          const postedAt = $(element).find('span.tw-text-hw-neutral-500, [data-testid="job-date"]').text().trim();
-          
-          // Vérifier si l'offre a moins de 3 mois
-          const isRecentEnough = isOfferRecentEnough(postedAt);
-          
-          // URL de l'offre
-          const offerPath = $(element).find('a[href^="/fr-fr/emplois/"]').first().attr('href') || '';
-          const url = offerPath ? `https://www.hellowork.com${offerPath}` : '';
-          
-          // ID unique pour l'offre
-          const id = `hw-page${currentPage}-${offerPath.split('/').pop()?.split('.')[0] || i}`;
-          
-          // Logo URL (si disponible)
-          const logoUrl = $(element).find('img').attr('src') || '';
-          
-          // Seulement ajouter l'offre si elle a un titre et est récente
-          if (title && isRecentEnough) {
-            pageOffersCount++;
-            offers.push({
-              id,
-              title,
-              company: company || 'Entreprise non précisée',
-              location: location || city,
-              description: description || 'Aucune description disponible',
-              salary,
-              contractType: 'Intérim', // Toutes les offres sont d'intérim sur cette page
-              duration,
-              url,
-              postedAt,
-              logoUrl
-            });
-          }
-        });
-        
-        // Vérifier s'il y a une pagination et une page suivante
-        const hasNextPage = $('.tw-pagination-next, [aria-label="Next page"]').length > 0;
-        
-        // Si pas d'offres sur cette page ou pas de page suivante, on arrête
-        if (pageOffersCount === 0 || !hasNextPage) {
-          hasMorePages = false;
-        } else {
-          currentPage++;
-          
-          // Émettre un événement de page complétée
-          try {
-            const pageCompleteEvent = new CustomEvent('scraping-progress', {
-              detail: { 
-                type: 'scraping-page-complete',
-                message: `Page ${currentPage-1} complétée avec ${pageOffersCount} offres`
-              }
-            });
-            window.dispatchEvent(pageCompleteEvent);
-          } catch (eventError) {
-            console.warn('Erreur lors de l\'émission de l\'événement de page complétée:', eventError);
-          }
+      // Construire l'URL avec les paramètres de recherche
+      const searchParams = new URLSearchParams({
+        k: jobTitle,
+        l: city ? `${city} 75000` : 'Paris 75000',
+        c: 'Travail_temp', // Filtrer sur l'intérim
+        page: page.toString(),
+      });
+
+      const url = `${baseUrl}?${searchParams.toString()}`;
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
         }
-      } catch (pageError) {
-        console.warn(`Erreur lors de la récupération de la page ${currentPage}:`, pageError);
-        hasMorePages = false;
+      });
+      
+      const $ = cheerio.load(response.data);
+
+      // Sélecteurs mis à jour pour la structure actuelle de HelloWork
+      $('article[data-testid="job-card"]').each((_, element) => {
+        const el = $(element);
+        const id = el.attr('id') || `hw-${Date.now()}-${offers.length}`;
+        const title = el.find('[data-testid="job-title"]').text().trim();
+        const company = el.find('[data-testid="company-name"]').text().trim();
+        const location = el.find('[data-testid="job-location"]').text().trim();
+        const description = el.find('[data-testid="job-description"]').text().trim();
+        const salary = el.find('[data-testid="job-salary"]').text().trim() || undefined;
+        const contractType = 'Intérim';
+        const duration = el.find('[data-testid="job-contract-duration"]').text().trim() || undefined;
+        const url = el.find('a[href^="/fr-fr/emplois/"]').attr('href') || '';
+        const postedAt = el.find('[data-testid="job-date"]').text().trim() || undefined;
+
+        if (title && company) { // Vérifier que les données essentielles sont présentes
+          offers.push({
+            id,
+            title,
+            company,
+            location: location || (city ? `${city} - 75` : 'Paris - 75'),
+            description: description || 'Description non disponible',
+            salary,
+            contractType,
+            duration,
+            url: url.startsWith('http') ? url : `https://www.hellowork.com${url}`,
+            postedAt,
+          });
+        }
+      });
+
+      // Si aucune offre trouvée sur la page, arrêter la pagination
+      if ($('article[data-testid="job-card"]').length === 0) {
+        break;
       }
+
+      // Attendre entre chaque requête pour éviter d'être bloqué
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+    } catch (error) {
+      console.error(`Erreur lors du scraping de la page ${page}:`, error);
+      break;
     }
+  }
+
+  return offers;
+}
+
+/**
+ * Recherche des offres d'emploi
+ */
+export async function searchJobs(city: string = '', jobTitle: string = ''): Promise<JobOffer[]> {
+  try {
+    // Récupérer les offres via le scraping
+    const offers = await scrapeHelloWorkJobs(city, jobTitle);
     
-    // Fermer le navigateur Puppeteer après utilisation
-    try {
-      await browserAutomation.close();
-    } catch (closeError) {
-      console.warn('Erreur lors de la fermeture du navigateur:', closeError);
-    }
-    
-    // Filtrer les offres par titre de poste si spécifié
-    const nonEmptyOffers = offers.filter(o => o.title && o.company);
-    
-    let filteredOffers = jobTitle 
-      ? nonEmptyOffers.filter(offer => offer.title.toLowerCase().includes(jobTitle.toLowerCase())) 
-      : nonEmptyOffers;
-    
-    console.log(`Nombre total d'offres d'intérim récupérées: ${filteredOffers.length}`);
-    
-    // Si nous n'avons pas pu récupérer d'offres, utilisons les données de secours
-    if (filteredOffers.length === 0) {
-      console.warn("Aucune offre trouvée via le scraping, utilisation des données de secours");
-      return getBackupOffers(city, jobTitle);
-    }
-    
-    return filteredOffers;
+    // Trier par date de publication (les plus récentes en premier)
+    return offers.sort((a, b) => {
+      if (!a.postedAt || !b.postedAt) return 0;
+      // Convertir les dates relatives en valeurs numériques pour le tri
+      const getTimeValue = (date: string) => {
+        const hours = date.includes('heure') ? parseInt(date.match(/\d+/)?.[0] || '0') : 0;
+        const days = date.includes('jour') ? parseInt(date.match(/\d+/)?.[0] || '0') * 24 : 0;
+        const weeks = date.includes('semaine') ? parseInt(date.match(/\d+/)?.[0] || '0') * 24 * 7 : 0;
+        return hours + days + weeks;
+      };
+      return getTimeValue(a.postedAt) - getTimeValue(b.postedAt);
+    });
   } catch (error) {
-    console.error('Erreur lors de la récupération des offres:', error);
-    // En cas d'erreur, utiliser les données de secours
-    return getBackupOffers(city, jobTitle);
+    console.error('Erreur lors de la recherche des offres:', error);
+    return [];
+  }
+}
+
+/**
+ * Récupère les détails d'une offre
+ */
+export async function getJobDetails(jobId: string): Promise<JobOffer | null> {
+  try {
+    const response = await axios.get(`https://www.hellowork.com/fr-fr/emplois/${jobId}.html`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
+      }
+    });
+
+    const $ = cheerio.load(response.data);
+    
+    return {
+      id: jobId,
+      title: $('[data-testid="job-title"]').text().trim(),
+      company: $('[data-testid="company-name"]').text().trim(),
+      location: $('[data-testid="job-location"]').text().trim(),
+      description: $('[data-testid="job-description"]').text().trim(),
+      salary: $('[data-testid="job-salary"]').text().trim() || undefined,
+      contractType: 'Intérim',
+      duration: $('[data-testid="job-contract-duration"]').text().trim() || undefined,
+      url: `https://www.hellowork.com/fr-fr/emplois/${jobId}.html`,
+      postedAt: $('[data-testid="job-date"]').text().trim() || undefined,
+    };
+  } catch (error) {
+    console.error('Erreur lors de la récupération des détails:', error);
+    return null;
   }
 }
 
@@ -462,88 +403,6 @@ function getBackupOffers(city: string = '', jobTitle: string = ''): JobOffer[] {
   }
   
   return backupOffers;
-}
-
-/**
- * Récupère plus de détails sur une offre spécifique
- */
-export async function getJobDetails(jobId: string): Promise<JobOffer | null> {
-  try {
-    // Rechercher l'offre dans la base de données
-    const jobOffer = getJobById(jobId);
-    
-    // Si l'offre existe, on la retourne
-    if (jobOffer) {
-      return jobOffer;
-    }
-    
-    // Si l'offre n'est pas trouvée dans la base de données, on essaie de la récupérer via le scraping
-    console.log(`Offre avec ID ${jobId} non trouvée dans la base de données, tentative de récupération via le scraping`);
-    
-    // Récupérer toutes les offres disponibles
-    const allOffers = await scrapeHelloWorkJobs();
-    const basicOffer = allOffers.find(offer => offer.id === jobId);
-    
-    if (!basicOffer || !basicOffer.url) return null;
-    
-    // Récupérer les détails complets depuis la page de l'offre
-    try {
-      const response = await axios.get(basicOffer.url);
-      const html = response.data;
-      const $ = cheerio.load(html);
-      
-      // Extraire la description complète
-      let fullDescription = $('.tw-prose').text().trim();
-      
-      // Si on n'a pas pu extraire la description, on utilise celle de base avec un enrichissement
-      if (!fullDescription) {
-        fullDescription = basicOffer.description + 
-          '\n\nCompétences requises:\n- Expérience dans un poste similaire\n- Autonomie et sens de l\'organisation\n- Capacité à travailler en équipe';
-      }
-      
-      // Enrichir l'offre avec plus de détails
-      return {
-        ...basicOffer,
-        description: fullDescription,
-      };
-    } catch (detailError) {
-      console.error('Erreur lors de la récupération des détails:', detailError);
-      
-      // En cas d'échec, on retourne l'offre de base avec une description enrichie
-      return {
-        ...basicOffer,
-        description: basicOffer.description + 
-          '\n\nNous recherchons une personne motivée et dynamique pour rejoindre notre équipe.\n\nCompétences requises:\n- Expérience dans un poste similaire\n- Autonomie et sens de l\'organisation\n- Capacité à travailler en équipe\n\nAvantages:\n- Tickets restaurant\n- Mutuelle d\'entreprise\n- Possibilité de télétravail partiel',
-      };
-    }
-  } catch (error) {
-    console.error('Erreur lors de la récupération des détails de l\'offre:', error);
-    return null;
-  }
-}
-
-/**
- * Récupère les offres d'emploi correspondant aux critères
- */
-export async function searchJobs(city: string = '', jobTitle: string = ''): Promise<JobOffer[]> {
-  try {
-    console.log(`Lancement de la recherche d'offres pour ${city || 'toute la France'} et poste: ${jobTitle || 'tous'}`);
-    
-    // Utiliser la base de données complète d'offres réelles avec tous les résultats
-    // (sans pagination limitée)
-    const { results, total } = searchJobsInDatabaseWithPagination(city, jobTitle, 1, 10000);
-    
-    // Log du nombre d'offres trouvées
-    console.log(`${total} offres trouvées dans la base de données, affichage de ${results.length} offres`);
-    
-    // Retourner les résultats
-    return results;
-    
-  } catch (error) {
-    console.error('Erreur lors de la recherche d\'emplois:', error);
-    // En cas d'erreur, on retourne un tableau vide
-    return [];
-  }
 }
 
 /**
