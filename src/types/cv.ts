@@ -13,9 +13,9 @@ export const experienceEntrySchema = z.object({
 export const educationEntrySchema = z.object({
   etablissement: z.string().min(1, { message: "education.validation.institutionRequired" }),
   diplome: z.string().min(1, { message: "education.validation.degreeRequired" }),
-  debut: z.string().min(1, { message: "education.validation.startDateRequired" }),
-  fin: z.string(),
-  description: z.string().max(300, { message: "education.validation.descriptionMaxLength" })
+  debut: z.string().optional(),
+  fin: z.string().optional(),
+  description: z.string().optional(),
 });
 
 // Schéma Zod pour une entrée de compétence (Utilisé dans le tableau `competences`)

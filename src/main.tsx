@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
 import FormationPage from './pages/FormationPage';
-import OffresEmploiPage from './pages/OffresEmploiPage';
 import './index.css';
 
 // Importer la configuration i18n
@@ -24,7 +23,6 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/formation" element={<FormationPage />} />
-          <Route path="/offres-emploi" element={<OffresEmploiPage />} />
         </Routes>
       </BrowserRouter>
     </Suspense>

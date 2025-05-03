@@ -43,22 +43,22 @@ const LOCAL_STORAGE_KEY = 'cv-creator-data-v2'; // Changer la clé si la structu
 
 // Valeur initiale pour CVData
 const initialCVData: CVData = {
-  personal: { 
-    nom: '', 
-    prenom: '', 
-    email: '', 
-    telephone: '', 
-    adresse: '', 
+    personal: {
+      nom: '',
+      prenom: '',
+      email: '',
+      telephone: '',
+      adresse: '',
     linkedin: '', 
     github: '', 
     portfolio: '', 
     titre: '', 
     description: '' 
   } as PersonalData,
-  experience: [],
-  education: [],
-  skills: { 
-    competences: [], 
+    experience: [],
+    education: [],
+    skills: {
+      competences: [],
     langues: []
   },
 };
@@ -204,15 +204,6 @@ function App() {
 
   const handleNavigate = async (targetSection: Section) => {
     if (targetSection === currentSection) return;
-    
-    const currentFormRef = formRefs[currentSection];
-    if (currentFormRef?.current?.triggerSubmit) {
-      const success = await currentFormRef.current.triggerSubmit();
-      if (!success) {
-        toast.error(t('errors.unsavedChanges', { ns: 'common', defaultValue: "Veuillez corriger les erreurs avant de continuer." }));
-        return;
-      }
-    }
     setCurrentSection(targetSection);
   };
 
@@ -293,8 +284,8 @@ function App() {
         icon={GraduationCap} 
         path="/formation" 
         label={t('sidebar.training', 'Se former')}
-      />
-    </div>
+                  />
+                </div>
   ), [t]);
 
   return (

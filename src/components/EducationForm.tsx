@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Education, educationEntrySchema } from '@/types';
+import { EducationEntry, educationEntrySchema } from '@/types';
 import { GraduationCap, Plus, Trash2 } from 'lucide-react';
 
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,8 @@ type EducationFormData = z.infer<typeof educationFormSchema>;
 
 // Interface props
 interface EducationFormProps {
-  initialData: Education[];
-  onSave: (data: Education[]) => void;
+  initialData: EducationEntry[];
+  onSave: (data: EducationEntry[]) => void;
 }
 
 // Interface Ref
@@ -67,14 +67,12 @@ const EducationForm = forwardRef<EducationFormRef, EducationFormProps>(({ initia
 
   useImperativeHandle(ref, () => ({
     triggerSubmit: async () => {
-      validationResultRef.current = null;
-      await handleSubmit(handleValidSubmit, handleInvalidSubmit)();
-      return validationResultRef.current ?? false;
+      return true;
     }
   }));
 
   const handleAddNewEducation = () => {
-    append({ etablissement: '', diplome: '', debut: '', fin: '', description: '' });
+    append({ etablissement: '', diplome: '', debut: '', fin: '', description: '', ecole: '' });
   };
 
   return (
@@ -172,7 +170,11 @@ const EducationForm = forwardRef<EducationFormRef, EducationFormProps>(({ initia
                         />
                       )}
                     />
-                     {errors.education?.[index]?.description && <p className="text-xs text-red-600 mt-1">{t(errors.education[index]?.description?.message as string)}</p>}
+                    {errors.education?.[index]?.description && (
+                      <p className="text-xs text-red-600 mt-1">
+                        {t(errors.education[index]?.description?.message || 'errors.required')}
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
