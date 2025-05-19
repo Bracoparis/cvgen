@@ -204,6 +204,14 @@ function App() {
 
   const handleNavigate = async (targetSection: Section) => {
     if (targetSection === currentSection) return;
+    const currentFormRef = formRefs[currentSection];
+    if (currentFormRef?.current?.triggerSubmit) {
+      const success = await currentFormRef.current.triggerSubmit();
+      if (!success) {
+        toast.error(t('errors.unsavedChanges', { ns: 'common', defaultValue: "Veuillez corriger les erreurs avant de continuer." }));
+        return;
+      }
+    }
     setCurrentSection(targetSection);
   };
 
@@ -310,6 +318,13 @@ function App() {
               {t('sidebar.shortcuts', 'Raccourcis')}
             </h2>
             {shortcuts}
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => { localStorage.removeItem(LOCAL_STORAGE_KEY); window.location.reload(); }}
+            >
+              Réinitialiser le CV
+            </Button>
           </div>
         </aside>
 
