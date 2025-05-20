@@ -1,0 +1,186 @@
+{
+  "header": {
+    "title": "منشئ السيرة الذاتية"
+  },
+  "appTitle": "منشئ السيرة الذاتية",
+  "downloadButton": "تحميل السيرة الذاتية",
+  "sidebar": {
+    "personal": "المعلومات الشخصية",
+    "experience": "الخبرة",
+    "education": "التعليم",
+    "skills": "المهارات",
+    "preview": "معاينة"
+  },
+  "personalInfo": {
+    "title": "معلومات شخصية",
+    "name": "الاسم",
+    "firstName": "الاسم الأول",
+    "lastName": "الاسم الأخير",
+    "email": "البريد الإلكتروني",
+    "phoneNumber": "الهاتف",
+    "address": "العنوان",
+    "linkedin": "ملف لينكد إن",
+    "github": "ملف جيت هاب",
+    "portfolio": "المعرض",
+    "jobTitle": "المسمى الوظيفي",
+    "jobTitlePlaceholder": "مثال: مطور ويب",
+    "description": "الوصف",
+    "descriptionHelper": "وصف قصير سيظهر في أعلى سيرتك الذاتية",
+    "descriptionPlaceholder": "صف نفسك باختصار...",
+    "validation": {
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "الاسم الأخير مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "عنوان البريد الإلكتروني غير صالح",
+      "linkedinInvalid": "رابط لينكد إن غير صالح",
+      "githubInvalid": "رابط جيت هاب غير صالح",
+      "portfolioInvalid": "رابط المعرض غير صالح",
+      "descriptionMaxLength": "لا يمكن أن يتجاوز الوصف 300 حرف"
+    }
+  },
+  "experience": {
+    "title": "الخبرة المهنية",
+    "description": "أضف خبراتك المهنية",
+    "add": "إضافة خبرة",
+    "position": "المنصب",
+    "company": "الشركة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "tasks": "المهام والمسؤوليات",
+    "tasksPlaceholder": "صف مهامك ومسؤولياتك...",
+    "startDatePlaceholder": "مثال: يناير 2020",
+    "endDatePlaceholder": "مثال: ديسمبر 2021 أو حتى الآن",
+    "experienceCardTitle": "خبرة #{{index}}",
+    "noExperience": "لم تتم إضافة خبرة، انقر على الزر أعلاه لإضافة خبرة.",
+    "removeExperienceAria": "حذف هذه الخبرة",
+    "validation": {
+      "positionRequired": "المنصب مطلوب",
+      "companyRequired": "الشركة مطلوبة",
+      "startDateRequired": "تاريخ البدء مطلوب",
+      "tasksMaxLength": "لا يمكن أن يتجاوز الوصف 500 حرف"
+    }
+  },
+  "experienceForm": {
+    "title": "الخبرة المهنية",
+    "addExperience": "إضافة خبرة",
+    "position": "المنصب",
+    "company": "الشركة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "description": "الوصف",
+    "delete": "حذف",
+    "save": "حفظ"
+  },
+  "education": {
+    "title": "التعليم",
+    "description": "أضف شهاداتك وتعليمك",
+    "add": "إضافة تعليم",
+    "institution": "المؤسسة",
+    "degree": "الشهادة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "description": "الوصف",
+    "educationCardTitle": "تعليم #{{index}}",
+    "noEducation": "لم يتم إضافة تعليم، انقر على الزر أعلاه لإضافة تعليم.",
+    "removeEducationAria": "حذف هذا التعليم",
+    "validation": {
+      "institutionRequired": "المؤسسة مطلوبة",
+      "degreeRequired": "الشهادة مطلوبة",
+      "startDateRequired": "تاريخ البدء مطلوب",
+      "descriptionMaxLength": "لا يمكن أن يتجاوز الوصف 300 حرف"
+    }
+  },
+  "educationForm": {
+    "title": "التعليم",
+    "addEducation": "إضافة تعليم",
+    "institution": "المؤسسة",
+    "degree": "الشهادة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "description": "الوصف",
+    "delete": "حذف",
+    "save": "حفظ"
+  },
+  "skills": {
+    "title": "المهارات واللغات",
+    "description": "أضف مهاراتك التقنية واللغات",
+    "technicalSkills": "المهارات التقنية",
+    "languages": "اللغات",
+    "add": "إضافة",
+    "addSkillPlaceholder": "أدخل مهارة واضغط على Enter",
+    "addLanguagePlaceholder": "أدخل لغة واضغط على Enter",
+    "addPlaceholder": "إضافة",
+    "noSkills": "لم تتم إضافة مهارات",
+    "noLanguages": "لم تتم إضافة لغات",
+    "removeSkillAria": "حذف {{skill}}",
+    "removeLanguageAria": "حذف {{language}}",
+    "validation": {
+      "skillRequired": "اسم المهارة مطلوب",
+      "levelInvalid": "المستوى غير صالح"
+    },
+    "toast": {
+      "skillAdded": "تمت إضافة المهارة {{skill}}",
+      "skillExists": "المهارة {{skill}} موجودة بالفعل",
+      "skillEmpty": "الرجاء إدخال مهارة",
+      "skillRemoved": "تمت إزالة المهارة {{skill}}",
+      "languageAdded": "تمت إضافة اللغة {{language}}",
+      "languageExists": "اللغة {{language}} موجودة بالفعل",
+      "languageEmpty": "الرجاء إدخال لغة",
+      "languageRemoved": "تمت إزالة اللغة {{language}}"
+    }
+  },
+  "skillsForm": {
+    "title": "المهارات",
+    "addSkill": "إضافة مهارة",
+    "name": "اسم المهارة",
+    "level": "المستوى",
+    "selectLevel": "اختر المستوى",
+    "beginner": "مبتدئ",
+    "intermediate": "متوسط",
+    "advanced": "متقدم",
+    "expert": "خبير",
+    "delete": "حذف",
+    "save": "حفظ"
+  },
+  "preview": {
+    "title": "معاينة السيرة الذاتية",
+    "personalInfo": "المعلومات الشخصية",
+    "experiences": "الخبرات المهنية",
+    "education": "التعليم",
+    "skills": "المهارات",
+    "noPersonalInfo": "لم يتم تقديم معلومات شخصية.",
+    "noExperience": "لم تتم إضافة خبرة عمل.",
+    "noEducation": "لم يتم إضافة تعليم.",
+    "noSkills": "لم تتم إضافة مهارات.",
+    "present": "حاضر",
+    "contact": "الاتصال"
+  },
+  "errors": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "عنوان البريد الإلكتروني غير صالح",
+    "invalidUrl": "رابط غير صالح",
+    "maxLength": "لا يمكن أن يتجاوز الوصف {{count}} حرفًا",
+    "unsavedChanges": "يرجى تصحيح الأخطاء قبل المتابعة.",
+    "navigateToPreview": "يرجى الانتقال إلى المعاينة للتحميل.",
+    "previewAreaNotFound": "خطأ: منطقة المعاينة غير موجودة."
+  },
+  "ui": {
+    "previous": "السابق",
+    "next": "التالي",
+    "submit": "إنشاء السيرة الذاتية",
+    "download": "تحميل PDF"
+  },
+  "common": {
+    "saveSuccess": {
+      "personal": "تم حفظ المعلومات الشخصية",
+      "experience": "تم حفظ الخبرات",
+      "education": "تم حفظ التعليم",
+      "skills": "تم حفظ المهارات واللغات"
+    }
+  },
+  "pdf": {
+    "generating": "جاري إنشاء PDF...",
+    "success": "تم تحميل PDF!",
+    "error": "خطأ في إنشاء PDF."
+  }
+} 

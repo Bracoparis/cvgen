@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./out-tsc/node",
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noEmit": false
+  },
+  "include": [
+    "vite.config.ts",
+    "postcss.config.js",
+    "tailwind.config.js",
+    "eslint.config.js"
+  ]
+}

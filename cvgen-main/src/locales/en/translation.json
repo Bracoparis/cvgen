@@ -1,0 +1,103 @@
+{
+  "header": {
+    "title": "CV Builder",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "sidebar": {
+    "personal": "Personal Info",
+    "experience": "Experience",
+    "education": "Education",
+    "skills": "Skills",
+    "preview": "Preview",
+    "shortcuts": "Shortcuts",
+    "jobOffers": "Job Offers",
+    "training": "Training"
+  },
+  "personalInfo": {
+    "title": "Personal Information",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "phoneNumber": "Phone Number",
+    "address": "Address",
+    "save": "Save",
+    "saved": "Saved!",
+    "validation": {
+      "fullNameRequired": "Full name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email address",
+      "phoneNumberRequired": "Phone number is required",
+      "addressRequired": "Address is required"
+    }
+  },
+  "experience": {
+    "title": "Work Experience",
+    "add": "Add Experience",
+    "position": "Position",
+    "company": "Company",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "present": "Present",
+    "tasks": "Tasks (one per line)",
+    "save": "Save Experience",
+    "delete": "Delete",
+    "addPlaceholder": "Add new experience",
+    "validation": {
+      "positionRequired": "Position is required",
+      "companyRequired": "Company is required",
+      "startDateRequired": "Start date is required",
+      "endDateRequired": "End date is required or check 'Present'",
+      "endDateInvalid": "End date must be after start date",
+      "tasksRequired": "At least one task is required"
+    }
+  },
+  "education": {
+    "title": "Education",
+    "add": "Add Education",
+    "institution": "Institution",
+    "degree": "Degree",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "present": "Present",
+    "save": "Save Education",
+    "delete": "Delete",
+    "addPlaceholder": "Add new education",
+    "validation": {
+      "institutionRequired": "Institution is required",
+      "degreeRequired": "Degree is required",
+      "startDateRequired": "Start date is required",
+      "endDateRequired": "End date is required or check 'Present'",
+      "endDateInvalid": "End date must be after start date"
+    }
+  },
+  "skills": {
+    "title": "Skills",
+    "add": "Add Skill",
+    "skill": "Skill",
+    "save": "Save Skill",
+    "delete": "Delete",
+    "addPlaceholder": "Add new skill",
+    "validation": {
+      "skillRequired": "Skill is required"
+    }
+  },
+  "preview": {
+    "title": "CV Preview",
+    "personalInfo": "Personal Information",
+    "experience": "Work Experience",
+    "education": "Education",
+    "skills": "Skills",
+    "noInfo": "No information provided",
+    "noExperience": "No experience added",
+    "noEducation": "No education added",
+    "noSkills": "No skills added",
+    "present": "Present",
+    "tasks": "Main Tasks:"
+  },
+  "date": {
+    "selectDate": "Select date"
+  }
+} 
