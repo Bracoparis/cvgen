@@ -11,6 +11,7 @@ import {
   SkillsData 
 } from '@/types';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 // Importer seulement les références aux types et les composants légers
 import { PersonalFormRef } from '@/components/PersonalForm';
@@ -153,6 +154,9 @@ function App() {
     preview: null
   };
 
+  const [openAIResult, setOpenAIResult] = useState<string | null>(null);
+  const [loadingOpenAI, setLoadingOpenAI] = useState(false);
+
   // Sauvegarde localStorage optimisée
   useEffect(() => {
     const saveToStorage = () => {
@@ -212,6 +216,40 @@ function App() {
         return;
       }
     }
+    // Appel OpenAI si on va vers Aperçu
+    if (targetSection === 'preview') {
+      setLoadingOpenAI(true);
+      setOpenAIResult(null);
+      try {
+        const response = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: "Tu es un expert de la rédaction de CV. En utilisant les données suivantes, crée moi un CV professionel suivant les normes de France Travail, ainsi que des lettres de motivation types pour des offres d'emplois et des questions qui pourraient apparaitre lors d'entretiens basée sur les informations données."
+              },
+              {
+                role: 'user',
+                content: JSON.stringify(cvData, null, 2)
+              }
+            ]
+          },
+          {
+            headers: {
+              'Authorization': 'Bearer /',
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        setOpenAIResult(response.data.choices[0].message.content);
+      } catch (error) {
+        setOpenAIResult('Erreur lors de la génération du CV par OpenAI.');
+      } finally {
+        setLoadingOpenAI(false);
+      }
+    }
     setCurrentSection(targetSection);
   };
 
@@ -228,13 +266,13 @@ function App() {
           case 'skills':
             return <SkillsForm ref={skillsFormRef} initialData={cvData.skills} onSave={saveSkills} />;
           case 'preview':
-            return <PreviewCV cvData={cvData} />;
+            return <PreviewCV cvData={cvData} openAIResult={openAIResult} loadingOpenAI={loadingOpenAI} />;
           default:
             return null;
         }
       })()}
     </Suspense>
-  ), [currentSection, cvData, updatePersonal, saveExperiences, saveEducations, saveSkills]);
+  ), [currentSection, cvData, updatePersonal, saveExperiences, saveEducations, saveSkills, openAIResult, loadingOpenAI]);
 
   const handleDownloadPDF = () => {
     if (currentSection !== 'preview') {
