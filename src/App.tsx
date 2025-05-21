@@ -224,7 +224,7 @@ function App() {
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
           {
-            model: 'gpt-4o',
+            model: 'gpt-4',
             messages: [
               {
                 role: 'system',
@@ -243,9 +243,18 @@ function App() {
             }
           }
         );
-        setOpenAIResult(response.data.choices[0].message.content);
+        if (response.data && response.data.choices && response.data.choices[0]) {
+          setOpenAIResult(response.data.choices[0].message.content);
+        } else {
+          throw new Error('Format de réponse OpenAI invalide');
+        }
       } catch (error) {
-        setOpenAIResult('Erreur lors de la génération du CV par OpenAI.');
+        console.error('Erreur OpenAI:', error);
+        if (axios.isAxiosError(error)) {
+          setOpenAIResult(`Erreur lors de la génération du CV: ${error.response?.data?.error?.message || error.message}`);
+        } else {
+          setOpenAIResult('Erreur lors de la génération du CV par OpenAI.');
+        }
       } finally {
         setLoadingOpenAI(false);
       }

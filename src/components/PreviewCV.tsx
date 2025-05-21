@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CVData, ExperienceEntry, EducationEntry, SkillEntry } from '@/types';
 import { Briefcase, GraduationCap, Award, Mail, Phone, MapPin, Globe, ExternalLink, Search, Building } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Importer Card de Shadcn
 import {
@@ -18,9 +19,11 @@ import { Button } from "@/components/ui/button"; // Ajouter Button pour les acti
 
 interface PreviewCVProps {
   cvData: CVData;
+  openAIResult: string | null;
+  loadingOpenAI: boolean;
 }
 
-const PreviewCV: React.FC<PreviewCVProps> = ({ cvData }) => {
+const PreviewCV: React.FC<PreviewCVProps> = ({ cvData, openAIResult, loadingOpenAI }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -158,6 +161,27 @@ const PreviewCV: React.FC<PreviewCVProps> = ({ cvData }) => {
                     {language}
                   </Badge>
                 ))}
+              </div>
+            </section>
+          )}
+
+          {/* Section OpenAI */}
+          {loadingOpenAI && (
+            <div className="flex justify-center items-center py-8">
+              <LoadingSpinner size="large" />
+              <span className="ml-3 text-gray-600">Génération des suggestions...</span>
+            </div>
+          )}
+          
+          {openAIResult && !loadingOpenAI && (
+            <section className="mt-8 border-t pt-6">
+              <h2 className="text-xl md:text-2xl font-semibold text-purple-700 mb-5">
+                Suggestions et Conseils
+              </h2>
+              <div className="prose prose-sm max-w-none">
+                <pre className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
+                  {openAIResult}
+                </pre>
               </div>
             </section>
           )}
